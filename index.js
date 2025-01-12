@@ -8,7 +8,9 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173","https://assignment11-clients.web.app"
+
+  ],
   credentials: true,
   optionalSuccessStatus: 200,
 };
@@ -17,8 +19,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// DB_USER = my_marathon
-// DB_PASS = teCCwDpoNbRFBmHT
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yz4tz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -32,7 +33,7 @@ const client = new MongoClient(uri, {
 });
 // verifyToken
 const verifyToken = (req,res,next)=>{
-  console.log('iam middleware');
+  // console.log('iam middleware');
   const token = req.cookies?.token
   if(!token) return res.status(401).send({message: 'unauthorize access'})
     jwt.verify(token,process.env.SECRET_KEY,(err,decoded)=>{
@@ -41,14 +42,14 @@ const verifyToken = (req,res,next)=>{
   }
   req.user = decoded
   })
-  console.log(token);
+  // console.log(token);
   next()
 }
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const marathonsCollection = client.db("myMarathon").collection("marathon");
     const myMarathonsCollection = client
@@ -60,7 +61,7 @@ async function run() {
         const email = req.body
         //create token
         const token = jwt.sign(email, process.env.SECRET_KEY,{expiresIn:'365d'})
-        console.log(token);
+        // console.log(token);
         res.cookie('token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
@@ -91,7 +92,7 @@ async function run() {
         updated,
         options
       );
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
@@ -115,8 +116,8 @@ async function run() {
       const decodedEmail = req.user?.email
       // const isBuyer = req.query.buyer;
       const email = req.params.email;
-      console.log('email from token-->',decodedEmail);
-      console.log('email from params-->',email);
+      // console.log('email from token-->',decodedEmail);
+      // console.log('email from params-->',email);
       const search = req.query.search
       if(decodedEmail !== email) return res.status(401).send({message: 'unauthorize access'})
       let query = {
@@ -126,19 +127,7 @@ async function run() {
         },
       }
       if (email) query.email = email
-      // const query1 = { email };
-      // const decodedEmail = req.user?.email;
-      // console.log('email from token-->', decodedEmail)
-      // console.log('email from params-->', email)
-      // if (decodedEmail !== email)
-      //   return res.status(401).send({ message: "unauthorized access" });
-
-      // let query = {};
-      // if (isBuyer) {
-      //   query.buyer = email;
-      // } else {
-      //   query.email = email;
-      // }
+      
       const result = await myMarathonsCollection.find(query).toArray();
       res.send(result);
     });
@@ -148,7 +137,7 @@ async function run() {
       // 0. if a user placed a bid already in this job
       const query = { email: maraData.email, marathonId: maraData.marathonId };
       const alreadyExist = await myMarathonsCollection.findOne(query);
-      console.log("If already exist-->", alreadyExist);
+      // console.log("If already exist-->", alreadyExist);
       if (alreadyExist)
         return res
           .status(400)
@@ -166,7 +155,7 @@ async function run() {
         filter,
         update
       );
-      console.log(updateMaraCount);
+      // console.log(updateMaraCount);
       res.send(result);
     });
     // --------------------------
@@ -174,7 +163,7 @@ async function run() {
     app.post("/add-mara", async (req, res) => {
       const maraData = req.body;
       const result = await marathonsCollection.insertOne(maraData);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
     //gat all mara data from db
@@ -230,15 +219,15 @@ async function run() {
         updated,
         options
       );
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
